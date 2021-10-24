@@ -29,7 +29,10 @@ fn show_tables(src: &mut &[u8]) -> Result<()> {
 
     for _ in 0..num_table_deltas {
         let delta = TableDelta::eosio_deserialize(src)?;
-        let TableDelta::TableDeltaV0(delta_v0) = delta;
+        let delta_v0 = match delta {
+            TableDelta::TableDeltaV0(d) => Ok(d),
+            _ => Err(Error::new(ErrorKind::Other, "wrong nodeos version")),
+        }?;
         println!(
             "table: {:30} rows:{:10}",
             std::str::from_utf8(delta_v0.name.value)

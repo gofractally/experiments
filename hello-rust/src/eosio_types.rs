@@ -5,6 +5,23 @@ use crate::{
     eosio_bin::{read_varuint32, EosioDeserialize},
 };
 
+#[derive(Debug)]
+pub struct BinaryExtension<T> {
+    pub value: Option<T>,
+}
+
+impl<'a, T: EosioDeserialize<'a>> EosioDeserialize<'a> for BinaryExtension<T> {
+    fn eosio_deserialize(src: &mut &'a [u8]) -> Result<Self> {
+        if src.len() > 0 {
+            Ok(Self {
+                value: Some(T::eosio_deserialize(src)?),
+            })
+        } else {
+            Ok(Self { value: None })
+        }
+    }
+}
+
 // A string which might contain invalid UTF-8
 derive_eosio_deserialize! {
     pub struct Stringish<'a> {

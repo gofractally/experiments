@@ -1,5 +1,6 @@
 use crate::{derive_eosio_deserialize, eosio_types::*};
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct StateHistoryLogHeader {
         pub magic: u64,
@@ -8,10 +9,12 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct GetStatusRequestV0 {}
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct BlockPosition {
         pub block_num: u32,
@@ -19,6 +22,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct GetStatusResultV0 {
         pub head: BlockPosition,
@@ -27,9 +31,11 @@ derive_eosio_deserialize! {
         pub trace_end_block: u32,
         pub chain_state_begin_block: u32,
         pub chain_state_end_block: u32,
+        pub chain_id: BinaryExtension<Checksum256>, // nodeos v2.1
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct GetBlocksRequestV0 {
         pub start_block_num: u32,
@@ -43,12 +49,29 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.1
+derive_eosio_deserialize! {
+    pub struct GetBlocksRequestV1 {
+        pub start_block_num: u32,
+        pub end_block_num: u32,
+        pub max_messages_in_flight: u32,
+        pub have_positions: Vec<BlockPosition>,
+        pub irreversible_only: bool,
+        pub fetch_block: bool,
+        pub fetch_traces: bool,
+        pub fetch_deltas: bool,
+        pub fetch_block_header: bool,
+    }
+}
+
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct GetBlocksAckRequestV0 {
         pub num_messages: u32,
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct GetBlocksResultV0<'a> {
         pub head: BlockPosition,
@@ -61,20 +84,66 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.1: in response to GetBlocksRequestV0
 derive_eosio_deserialize! {
-    pub struct Row<'a> {
+    pub struct GetBlocksResultV1<'a> {
+        pub head: BlockPosition,
+        pub last_irreversible: BlockPosition,
+        pub this_block: Option<BlockPosition>,
+        pub prev_block: Option<BlockPosition>,
+        pub block: Option<SignedBlockVariant<'a>>,
+        pub traces: Bytes<'a>,
+        pub deltas: Bytes<'a>,
+    }
+}
+
+// nodeos v2.1: in response to GetBlocksRequestV1
+derive_eosio_deserialize! {
+    pub struct GetBlocksResultV2<'a> {
+        pub head: BlockPosition,
+        pub last_irreversible: BlockPosition,
+        pub this_block: Option<BlockPosition>,
+        pub prev_block: Option<BlockPosition>,
+        pub block: Bytes<'a>,
+        pub block_header: Bytes<'a>,
+        pub traces: Bytes<'a>,
+        pub deltas: Bytes<'a>,
+    }
+}
+
+// nodeos v2.0: didn't have version suffix
+derive_eosio_deserialize! {
+    pub struct RowV0<'a> {
         pub present: bool,
         pub data: Bytes<'a>,
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct TableDeltaV0<'a> {
         pub name: Stringish<'a>,
-        pub rows: Vec<Row<'a>>,
+        pub rows: Vec<RowV0<'a>>,
     }
 }
 
+// nodeos v2.1
+derive_eosio_deserialize! {
+    pub struct RowV1<'a> {
+        pub present: u8,
+        pub data: Bytes<'a>,
+    }
+}
+
+// nodeos v2.1
+derive_eosio_deserialize! {
+    pub struct TableDeltaV1<'a> {
+        pub name: Stringish<'a>,
+        pub rows: Vec<RowV1<'a>>,
+    }
+}
+
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct Action<'a> {
         pub account: Name,
@@ -84,6 +153,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct AccountAuthSequence {
         pub account: Name,
@@ -91,6 +161,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct ActionReceiptV0 {
         pub receiver: Name,
@@ -103,6 +174,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct AccountDelta {
         pub account: Name,
@@ -110,6 +182,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct ActionTraceV0<'a> {
         pub action_ordinal: Varuint32,
@@ -126,6 +199,64 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.1
+derive_eosio_deserialize! {
+    pub struct ActionTraceV1<'a> {
+        pub action_ordinal: Varuint32,
+        pub creator_action_ordinal: Varuint32,
+        pub receipt: Option<ActionReceipt>,
+        pub receiver: Name,
+        pub act: Action<'a>,
+        pub context_free: bool,
+        pub elapsed: i64,
+        pub console: Stringish<'a>,
+        pub account_ram_deltas: Vec<AccountDelta>,
+        pub account_disk_deltas: Vec<AccountDelta>,
+        pub except: Option<Stringish<'a>>,
+        pub error_code: Option<u64>,
+        pub return_value: Bytes<'a>,
+    }
+}
+
+// nodeos v2.1
+derive_eosio_deserialize! {
+    pub struct PrunableDataNone {
+        pub prunable_digest: Checksum256,
+    }
+}
+
+// nodeos v2.1
+derive_eosio_deserialize! {
+    pub struct PrunableDataPartial<'a> {
+        pub signatures: Vec<Signature<'a>>,
+        pub context_free_segments: Vec<SegmentType<'a>>,
+    }
+}
+
+// nodeos v2.1
+derive_eosio_deserialize! {
+    pub struct PrunableDataFull<'a> {
+        pub signatures: Vec<Signature<'a>>,
+        pub context_free_segments: Vec<Bytes<'a>>,
+    }
+}
+
+// nodeos v2.1
+derive_eosio_deserialize! {
+    pub struct PrunableDataFullLegacy<'a> {
+        pub signatures: Vec<Signature<'a>>,
+        pub packed_context_free_data: Bytes<'a>,
+    }
+}
+
+// nodeos v2.1
+derive_eosio_deserialize! {
+    pub struct PrunableDataStruct<'a> {
+        pub prunable_data: PrunableDataVariant<'a>,
+    }
+}
+
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct PartialTransactionV0<'a> {
         pub expiration: TimePointSec,
@@ -137,6 +268,20 @@ derive_eosio_deserialize! {
         pub transaction_extensions: Vec<Extension<'a>>,
         pub signatures: Vec<Signature<'a>>,
         pub context_free_data: Vec<Bytes<'a>>,
+    }
+}
+
+// nodeos v2.1
+derive_eosio_deserialize! {
+    pub struct PartialTransactionV1<'a> {
+        pub expiration: TimePointSec,
+        pub ref_block_num: u16,
+        pub ref_block_prefix: u32,
+        pub max_net_usage_words: Varuint32,
+        pub max_cpu_usage_ms: u8,
+        pub delay_sec: Varuint32,
+        pub transaction_extensions: Vec<Extension<'a>>,
+        pub prunable_data: Option<PrunableDataStruct<'a>>,
     }
 }
 
@@ -158,8 +303,18 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.1
 derive_eosio_deserialize! {
     pub struct PackedTransaction<'a> {
+        pub compression: u8,
+        pub prunable_data: PrunableDataStruct<'a>,
+        pub packed_trx: Bytes<'a>,
+    }
+}
+
+// nodeos v2.0: didn't have version suffix
+derive_eosio_deserialize! {
+    pub struct PackedTransactionV0<'a> {
         pub signatures: Vec<Signature<'a>>,
         pub compression: u8,
         pub packed_context_free_data: Bytes<'a>,
@@ -167,6 +322,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct TransactionReceiptHeader {
         pub status: u8,
@@ -175,6 +331,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.1
 derive_eosio_deserialize! {
     pub struct TransactionReceipt<'a> {
         pub transaction_receipt_header: TransactionReceiptHeader,
@@ -182,6 +339,15 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0: didn't have version suffix
+derive_eosio_deserialize! {
+    pub struct TransactionReceiptV0<'a> {
+        pub transaction_receipt_header: TransactionReceiptHeader,
+        pub trx: TransactionVariantV0<'a>,
+    }
+}
+
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct Extension<'a> {
         pub type_: u16,
@@ -189,6 +355,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct BlockHeader<'a> {
         pub timestamp: BlockTimestamp,
@@ -203,6 +370,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct SignedBlockHeader<'a> {
         pub block_header: BlockHeader<'a>,
@@ -210,14 +378,26 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0: didn't have version suffix
 derive_eosio_deserialize! {
-    pub struct SignedBlock<'a> {
+    pub struct SignedBlockV0<'a> {
         pub signed_block_header: SignedBlockHeader<'a>,
+        pub transactions: Vec<TransactionReceiptV0<'a>>,
+        pub block_extensions: Vec<Extension<'a>>,
+    }
+}
+
+// nodeos v2.1
+derive_eosio_deserialize! {
+    pub struct SignedBlockV1<'a> {
+        pub signed_block_header: SignedBlockHeader<'a>,
+        pub prune_state: u8,
         pub transactions: Vec<TransactionReceipt<'a>>,
         pub block_extensions: Vec<Extension<'a>>,
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct TransactionHeader {
         pub expiration: TimePointSec,
@@ -229,6 +409,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct Transaction<'a> {
         pub transaction_header: TransactionHeader,
@@ -238,6 +419,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct CodeId {
         pub vm_type: u8,
@@ -246,6 +428,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct AccountV0<'a> {
         pub name: Name,
@@ -254,6 +437,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct AccountMetadataV0 {
         pub name: Name,
@@ -263,6 +447,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct CodeV0<'a> {
         pub vm_type: u8,
@@ -272,6 +457,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct ContractTableV0 {
         pub code: Name,
@@ -281,6 +467,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct ContractRowV0<'a> {
         pub code: Name,
@@ -292,6 +479,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct ContractIndex64V0 {
         pub code: Name,
@@ -303,6 +491,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct ContractIndex128V0 {
         pub code: Name,
@@ -314,6 +503,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct ContractIndex256V0 {
         pub code: Name,
@@ -325,6 +515,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct ContractIndexDoubleV0 {
         pub code: Name,
@@ -336,6 +527,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct ContractIndexLongDoubleV0 {
         pub code: Name,
@@ -347,6 +539,17 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.1
+derive_eosio_deserialize! {
+    pub struct KeyValueV0<'a> {
+        pub contract: Name,
+        pub key: Bytes<'a>,
+        pub value: Bytes<'a>,
+        pub payer: Name,
+    }
+}
+
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct ProducerKey<'a> {
         pub producer_name: Name,
@@ -354,6 +557,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct ProducerSchedule<'a> {
         pub version: u32,
@@ -361,6 +565,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct BlockSigningAuthorityV0<'a> {
         pub threshold: u32,
@@ -368,6 +573,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct ProducerAuthority<'a> {
         pub producer_name: Name,
@@ -375,6 +581,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct ProducerAuthoritySchedule<'a> {
         pub version: u32,
@@ -382,6 +589,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct ChainConfigV0 {
         pub max_block_net_usage: u64,
@@ -404,6 +612,31 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.1
+derive_eosio_deserialize! {
+    pub struct ChainConfigV1 {
+        pub max_block_net_usage: u64,
+        pub target_block_net_usage_pct: u32,
+        pub max_transaction_net_usage: u32,
+        pub base_per_transaction_net_usage: u32,
+        pub net_usage_leeway: u32,
+        pub context_free_discount_net_usage_num: u32,
+        pub context_free_discount_net_usage_den: u32,
+        pub max_block_cpu_usage: u32,
+        pub target_block_cpu_usage_pct: u32,
+        pub max_transaction_cpu_usage: u32,
+        pub min_transaction_cpu_usage: u32,
+        pub max_transaction_lifetime: u32,
+        pub deferred_trx_expiration_window: u32,
+        pub max_transaction_delay: u32,
+        pub max_inline_action_size: u32,
+        pub max_inline_action_depth: u16,
+        pub max_authority_depth: u16,
+        pub max_action_return_value_size: u32,
+    }
+}
+
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct GlobalPropertyV0<'a> {
         pub proposed_schedule_block_num: Option<u32>,
@@ -412,6 +645,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct GlobalPropertyV1<'a> {
         pub proposed_schedule_block_num: Option<u32>,
@@ -421,6 +655,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct GeneratedTransactionV0<'a> {
         pub sender: Name,
@@ -431,6 +666,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct ActivatedProtocolFeatureV0 {
         pub feature_digest: Checksum256,
@@ -438,12 +674,14 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct ProtocolStateV0 {
         pub activated_protocol_features: Vec<ActivatedProtocolFeature>,
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct KeyWeight<'a> {
         pub key: PublicKey<'a>,
@@ -451,6 +689,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct PermissionLevel {
         pub actor: Name,
@@ -458,6 +697,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct PermissionLevelWeight {
         pub permission: PermissionLevel,
@@ -465,6 +705,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct WaitWeight {
         pub wait_sec: u32,
@@ -472,6 +713,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct Authority<'a> {
         pub threshold: u32,
@@ -481,6 +723,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct PermissionV0<'a> {
         pub owner: Name,
@@ -491,6 +734,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct PermissionLinkV0 {
         pub account: Name,
@@ -500,6 +744,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct ResourceLimitsV0 {
         pub owner: Name,
@@ -509,6 +754,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct UsageAccumulatorV0 {
         pub last_ordinal: u32,
@@ -517,6 +763,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct ResourceUsageV0 {
         pub owner: Name,
@@ -526,6 +773,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct ResourceLimitsStateV0 {
         pub average_block_net_usage: UsageAccumulator,
@@ -538,6 +786,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct ResourceLimitsRatioV0 {
         pub numerator: u64,
@@ -545,6 +794,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct ElasticLimitParametersV0 {
         pub target: u64,
@@ -556,6 +806,7 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.0
 derive_eosio_deserialize! {
     pub struct ResourceLimitsConfigV0 {
         pub cpu_limit_parameters: ElasticLimitParameters,
@@ -572,6 +823,7 @@ derive_eosio_deserialize! {
         GetStatusRequestV0(GetStatusRequestV0),
         GetBlocksRequestV0(GetBlocksRequestV0),
         GetBlocksAckRequestV0(GetBlocksAckRequestV0),
+        GetBlocksRequestV1(GetBlocksRequestV1), // nodeos v2.1
     }
 }
 
@@ -579,6 +831,8 @@ derive_eosio_deserialize! {
     pub enum Result<'a> {
         GetStatusResultV0(GetStatusResultV0),
         GetBlocksResultV0(GetBlocksResultV0<'a>),
+        GetBlocksResultV1(GetBlocksResultV1<'a>), // nodeos v2.1
+        GetBlocksResultV2(GetBlocksResultV2<'a>), // nodeos v2.1
     }
 }
 
@@ -591,12 +845,14 @@ derive_eosio_deserialize! {
 derive_eosio_deserialize! {
     pub enum ActionTrace<'a> {
         ActionTraceV0(ActionTraceV0<'a>),
+        ActionTraceV1(ActionTraceV1<'a>), // nodeos v2.1
     }
 }
 
 derive_eosio_deserialize! {
     pub enum PartialTransaction<'a> {
         PartialTransactionV0(PartialTransactionV0<'a>),
+        PartialTransactionV1(PartialTransactionV1<'a>), // nodeos v2.1
     }
 }
 
@@ -606,16 +862,52 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.1
 derive_eosio_deserialize! {
     pub enum TransactionVariant<'a> {
-        TransactionId(TransactionId),
+        Checksum256(Checksum256),
         PackedTransaction(PackedTransaction<'a>),
+    }
+}
+
+// nodeos v2.0: didn't have version suffix
+derive_eosio_deserialize! {
+    pub enum TransactionVariantV0<'a> {
+        TransactionId(TransactionId),
+        PackedTransactionV0(PackedTransactionV0<'a>),
+    }
+}
+
+// nodeos v2.1
+derive_eosio_deserialize! {
+    pub enum SignedBlockVariant<'a> {
+        SignedBlockV0(SignedBlockV0<'a>),
+        SignedBlockV1(SignedBlockV1<'a>),
+    }
+}
+
+// nodeos v2.1
+derive_eosio_deserialize! {
+    pub enum SegmentType<'a> {
+        Checksum256(Checksum256),
+        Bytes(Bytes<'a>),
+    }
+}
+
+// nodeos v2.1
+derive_eosio_deserialize! {
+    pub enum PrunableDataVariant<'a> {
+        PrunableDataFullLegacy(PrunableDataFullLegacy<'a>),
+        PrunableDataNone(PrunableDataNone),
+        PrunableDataPartial(PrunableDataPartial<'a>),
+        PrunableDataFull(PrunableDataFull<'a>),
     }
 }
 
 derive_eosio_deserialize! {
     pub enum TableDelta<'a> {
         TableDeltaV0(TableDeltaV0<'a>),
+        TableDeltaV1(TableDeltaV1<'a>), // nodeos v2.1
     }
 }
 
@@ -679,9 +971,17 @@ derive_eosio_deserialize! {
     }
 }
 
+// nodeos v2.1
+derive_eosio_deserialize! {
+    pub enum KeyValue<'a> {
+        KeyValueV0(KeyValueV0<'a>),
+    }
+}
+
 derive_eosio_deserialize! {
     pub enum ChainConfig {
         ChainConfigV0(ChainConfigV0),
+        ChainConfigV1(ChainConfigV1), // nodeos v2.1
     }
 }
 
@@ -782,6 +1082,7 @@ derive_eosio_deserialize! {
         { "name": "contract_index256", "type": "contract_index256", "key_names": ["code", "scope", "table", "primary_key"] },
         { "name": "contract_index_double", "type": "contract_index_double", "key_names": ["code", "scope", "table", "primary_key"] },
         { "name": "contract_index_long_double", "type": "contract_index_long_double", "key_names": ["code", "scope", "table", "primary_key"] },
+        { "name": "key_value", "type": "key_value", "key_names": ["contract", "key"] },
         { "name": "global_property", "type": "global_property", "key_names": [] },
         { "name": "generated_transaction", "type": "generated_transaction", "key_names": ["sender", "sender_id"] },
         { "name": "protocol_state", "type": "protocol_state", "key_names": [] },
