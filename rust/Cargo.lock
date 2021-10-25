@@ -63,6 +63,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "eosio"
+version = "0.1.0"
+dependencies = [
+ "eosio_proc_macros",
+]
+
+[[package]]
+name = "eosio_proc_macros"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "hashbrown"
 version = "0.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -82,7 +98,7 @@ name = "hello-rust"
 version = "0.1.0"
 dependencies = [
  "clap",
- "integer-encoding",
+ "eosio",
  "miniz_oxide",
 ]
 
@@ -104,12 +120,6 @@ dependencies = [
  "autocfg",
  "hashbrown",
 ]
-
-[[package]]
-name = "integer-encoding"
-version = "3.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90c11140ffea82edce8dcd74137ce9324ec24b3cf0175fc9d7e29164da9915b8"
 
 [[package]]
 name = "lazy_static"

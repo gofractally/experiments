@@ -1,16 +1,12 @@
-mod eosio_bin;
-mod eosio_types;
-mod ship_types;
-
 extern crate clap;
 
 use clap::Parser;
 use miniz_oxide::inflate::decompress_to_vec_zlib;
 use std::io::{Error, ErrorKind, Result};
 
-use eosio_bin::*;
-use eosio_types::*;
-use ship_types::*;
+use eosio::bin::*;
+use eosio::ship_types::*;
+use eosio::types::*;
 
 #[derive(Parser, Debug)]
 #[clap(name = "hello-rust")]

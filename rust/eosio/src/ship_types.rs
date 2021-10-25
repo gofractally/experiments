@@ -1,38 +1,35 @@
-use crate::{derive_eosio_deserialize, eosio_types::*};
+use crate::{derive_eosio_deserialize, types::*};
+use eosio_proc_macros::EosioDeserialize;
 
 // nodeos v2.0
-derive_eosio_deserialize! {
-    pub struct StateHistoryLogHeader {
-        pub magic: u64,
-        pub block_id: Checksum256,
-        pub payload_size: u64,
-    }
+#[derive(Debug, EosioDeserialize)]
+pub struct StateHistoryLogHeader {
+    pub magic: u64,
+    pub block_id: Checksum256,
+    pub payload_size: u64,
 }
 
 // nodeos v2.0
-derive_eosio_deserialize! {
-    pub struct GetStatusRequestV0 {}
+#[derive(Debug, EosioDeserialize)]
+pub struct GetStatusRequestV0 {}
+
+// nodeos v2.0
+#[derive(Debug, EosioDeserialize)]
+pub struct BlockPosition {
+    pub block_num: u32,
+    pub block_id: Checksum256,
 }
 
 // nodeos v2.0
-derive_eosio_deserialize! {
-    pub struct BlockPosition {
-        pub block_num: u32,
-        pub block_id: Checksum256,
-    }
-}
-
-// nodeos v2.0
-derive_eosio_deserialize! {
-    pub struct GetStatusResultV0 {
-        pub head: BlockPosition,
-        pub last_irreversible: BlockPosition,
-        pub trace_begin_block: u32,
-        pub trace_end_block: u32,
-        pub chain_state_begin_block: u32,
-        pub chain_state_end_block: u32,
-        pub chain_id: BinaryExtension<Checksum256>, // nodeos v2.1
-    }
+#[derive(Debug, EosioDeserialize)]
+pub struct GetStatusResultV0 {
+    pub head: BlockPosition,
+    pub last_irreversible: BlockPosition,
+    pub trace_begin_block: u32,
+    pub trace_end_block: u32,
+    pub chain_state_begin_block: u32,
+    pub chain_state_end_block: u32,
+    pub chain_id: BinaryExtension<Checksum256>, // nodeos v2.1
 }
 
 // nodeos v2.0
@@ -91,7 +88,7 @@ derive_eosio_deserialize! {
         pub last_irreversible: BlockPosition,
         pub this_block: Option<BlockPosition>,
         pub prev_block: Option<BlockPosition>,
-        pub block: Option<SignedBlockVariant<'a>>,
+        pub block: Option<Box<SignedBlockVariant<'a>>>,
         pub traces: Bytes<'a>,
         pub deltas: Bytes<'a>,
     }

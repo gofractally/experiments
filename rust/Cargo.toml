@@ -1,0 +1,7 @@
+[workspace]
+
+members = [
+	"eosio_proc_macros",
+	"eosio",
+	"hello-rust",
+]

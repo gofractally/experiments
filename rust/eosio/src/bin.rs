@@ -119,7 +119,7 @@ macro_rules! derive_eosio_deserialize {
         pub struct $name {
             $(pub $field_name: $field_type,)*
         }
-        impl<'a> crate::eosio_bin::EosioDeserialize<'a> for $name {
+        impl<'a> crate::bin::EosioDeserialize<'a> for $name {
             fn eosio_deserialize(_src: &mut &'a [u8]) -> std::io::Result<Self> {
                 Ok($name{
                     $($field_name: <$field_type>::eosio_deserialize(_src)?,)*
@@ -135,7 +135,7 @@ macro_rules! derive_eosio_deserialize {
         pub struct $name<'a> {
             $(pub $field_name: $field_type,)*
         }
-        impl<'a> crate::eosio_bin::EosioDeserialize<'a> for $name<'a> {
+        impl<'a> crate::bin::EosioDeserialize<'a> for $name<'a> {
             fn eosio_deserialize(src: &mut &'a [u8]) -> std::io::Result<$name<'a>> {
                 let res: $name<'a> = $name{
                     $($field_name: <$field_type>::eosio_deserialize(src)?,)*
@@ -152,7 +152,7 @@ macro_rules! derive_eosio_deserialize {
         pub enum $name {
             $($field_name($field_type),)*
         }
-        impl<'a> crate::eosio_bin::EosioDeserialize<'a> for $name {
+        impl<'a> crate::bin::EosioDeserialize<'a> for $name {
             fn eosio_deserialize(src: &mut &'a [u8]) -> std::io::Result<Self> {
                 // TODO: need better approach
                 let fns = [
@@ -160,7 +160,7 @@ macro_rules! derive_eosio_deserialize {
                         Ok($name::$field_name(<$field_type>::eosio_deserialize(src)?))
                     } as &dyn Fn(&mut &'a [u8]) -> std::io::Result<$name>,)*
                 ];
-                fns[crate::eosio_bin::read_varuint32(src)? as usize](src)
+                fns[crate::bin::read_varuint32(src)? as usize](src)
             }
         }
     };
@@ -172,7 +172,7 @@ macro_rules! derive_eosio_deserialize {
         pub enum $name<'a> {
             $($field_name($field_type),)*
         }
-        impl<'a> crate::eosio_bin::EosioDeserialize<'a> for $name<'a> {
+        impl<'a> crate::bin::EosioDeserialize<'a> for $name<'a> {
             fn eosio_deserialize(src: &mut &'a [u8]) -> std::io::Result<Self> {
                 // TODO: need better approach
                 let fns = [
@@ -180,7 +180,7 @@ macro_rules! derive_eosio_deserialize {
                         Ok($name::$field_name(<$field_type>::eosio_deserialize(src)?))
                     } as &dyn Fn(&mut &'a [u8]) -> std::io::Result<$name<'a>>,)*
                 ];
-                fns[crate::eosio_bin::read_varuint32(src)? as usize](src)
+                fns[crate::bin::read_varuint32(src)? as usize](src)
             }
         }
     };
